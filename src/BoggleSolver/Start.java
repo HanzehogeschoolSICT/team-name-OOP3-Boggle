@@ -1,127 +1,175 @@
 package BoggleSolver;
 
-import javafx.scene.layout.Pane;
-
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
  * Created by peterzen on 2017-03-13.
  * Part of the team-name-OOP3-Boggle project.
+ * With the help of https://www.youtube.com/watch?v=1dyaASFf-Uc
+ * With the help of https://github.com/bilash/boggle-solver
+ * Edits to boggle-solver code:
+ * - edited variable names for clarification and educational purposes
+ * - refactored DictNode class to use a Map for broader character support
+ * - refactored some syntax forms
+ * With the help of http://exceptional-code.blogspot.nl/2012/02/solving-boggle-game-recursion-prefix.html
  */
 public class Start {
-    private int rows, cols;
-    private char[][] boggleBoard;
-    private List<String> foundWords;
-    private static final List<String> dictionary = loadDictionary("dict-1.txt");
-    private static int longestDictWordSize;
+    private static final int boardSize = 4;
+    private static char[][] boggleBoard = new char[boardSize][boardSize];
+    private static DictNode dictRoot;
 
-    private static List<String> loadDictionary(String dictFile) {
-        try {
-            File fin = new File(Start.class.getClassLoader().getResource(dictFile).toURI());
+    private static class DictNode {
+        public final char letter;
+        public Map<Character, DictNode> nextNodes = new HashMap<>(); // for the 26 characters of the alphabet
+        public boolean wordEnd;
 
-            BufferedReader br;
-            try {
-                br = new BufferedReader(new FileReader(fin));
+        public DictNode(final char letter) {
+            this.letter = letter;
+        }
 
-                List<String> words = new ArrayList<>();
-                String line;
-                try {
-                    while ((line = br.readLine()) != null) {
-                        if (line.length() > longestDictWordSize) {
-                            longestDictWordSize = line.length();
-                        }
-                        words.add(line);
+        public void insert(final String word) {
+            DictNode node = dictRoot;
+            char[] letters = word.toCharArray();
+            for (int i = 0; i < letters.length; i++) {
+                // add a character node to current depth if needed and set the wordEnd tag if needed:
+                if (node.nextNodes.get(letters[i]) == null) { // letters[i] - 'a' results in value of: 0-26
+                    node.nextNodes.put(letters[i], new DictNode(letters[i]));
+
+                    if (i == letters.length - 1) {
+                        node.nextNodes.get(letters[i]).wordEnd = true;
                     }
-                    br.close();
-
-                    return words;
-
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
 
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
+                // increase depth for next character in word
+                node = node.nextNodes.get(letters[i]);
+            }
         }
 
-        return null;
+        public boolean contains(final String word) {
+            DictNode node = dictRoot;
+            char[] letters = word.toCharArray();
+            int i = 0;
+            while (i < letters.length && node.nextNodes.get(letters[i]) != null) {
+                node = node.nextNodes.get(letters[i]);
+                i++;
+            }
+
+            return (i == letters.length) && node.wordEnd;
+
+        }
     }
 
-    public static void main(String[] args) {
+    public static void readDict(String dictFile) throws IOException, URISyntaxException {
+        File fin = new File(Start.class.getClassLoader().getResource(dictFile).toURI());
+
+        List<String> words = Files.readAllLines(fin.toPath(), StandardCharsets.UTF_8);
+
+        dictRoot = new DictNode('\0'); // set the rootNode by default to a 0 char
+        for (String word : words) {
+            dictRoot.insert(word);
+        }
+    }
+
+    public static void main(String[] args) throws IOException, URISyntaxException {
         new Start();
-//        System.out.println(dictionary.get(2)); // prints: aanbellen
     }
 
-    public Start() {
-        rows = 4;
-        cols = 4;
-        foundWords = new LinkedList<>();
-        boggleBoard = new char[rows][cols];
-
+    public Start() throws IOException, URISyntaxException {
+        readDict("dict.txt");
         fillStaticBoggleBoard();
-        printBoggleBoard();
-        System.out.println("Longest Dictionary word: " + longestDictWordSize);
-        // Find all boggle words known by the current dictionary in the current boggleBoard
-        for (int rowIndex = 0; rowIndex < boggleBoard.length; rowIndex++) {
-            for (int colIndex = 0; colIndex < boggleBoard[rowIndex].length; colIndex++) {
-                // start finding words with the character at position rowIndex, colIndex
-                findWords(rowIndex, colIndex, new BoggWord());
-            }
-        }
-        System.out.println();
-        System.out.println("Found: " + foundWords.size() + " words!");
-        foundWords.forEach(System.out::println);
+        long start = System.currentTimeMillis();
+
+        findBoggleWords(dictRoot, new char[50], 0);
     }
 
-    private void findWords(int rowIndex, int colIndex, BoggWord currentWord) {
-//        System.out.println(currentWord);
+    private void findBoggleWords(DictNode node, char[] currentSearch, int currentDepth) {
+        if (node == null)
+            return; // a null-node means we have ended on the bottom of the DictNode Tri @TODO: true?
 
-        if (isOutOfBounds(rowIndex, colIndex))
-            return;
-
-        BoggLetter currentLetter = new BoggLetter(rowIndex, colIndex, boggleBoard[rowIndex][colIndex]);
-        if (currentWord.hasLetter(currentLetter))
-            return; // No new BoggLetter to add
-        // BoggLetter is new: add to the currentWord
-        currentWord.add(currentLetter);
-
-        if (currentWord.length() >= 3) {
-            if (dictionary.contains(currentWord.toString())) {
-                System.out.println("Found this word: " + currentWord.toString());
-                foundWords.add(currentWord.toString());
-            }
-
-            if (currentWord.length() >= longestDictWordSize) {
-                return; // Stop checking for currentWord (there are no more words in the dictionary, longer than this)
+        if (node.wordEnd && currentDepth > 3) { // we have found a legit word
+            // create the word String from our currentSearch characters
+            String word = new String(currentSearch, 0, currentDepth - 1);
+            if (isInBoard(word)) {
+                System.out.println(word);
             }
         }
 
-        // add new characters to currentWord
-        // this recursively calls the current method with all adjacent character possibilities
-        for (int i = rowIndex - 1; i <= rowIndex + 1; i++) {
-            for (int j = colIndex - 1; j <= colIndex + 1; j++) {
-                findWords(i, j, new BoggWord(currentWord));
-            }
-        }
+        // delve a level deeper into the dictionary by adding the nextNodes (next characters)
+        // and recursively calling this function with an incremented depth
+        node.nextNodes.forEach((character, nextNode) -> {
+            currentSearch[currentDepth] = character;
+            findBoggleWords(nextNode, currentSearch, currentDepth + 1);
+        });
+
+        // @TODO: see if my version does not break ^
+//        for (int i = 0; i < node.nextNodes.length; i++) {
+//            if (node.nextNodes[i] != null) {
+// fill currentBranch[currentHeight] with the char of the current node
+//                currentBranch[currentHeight] = (char) (i + 'a');
+//                boggleTrieDynamic(node.nextNodes[i], currentBranch, currentHeight + 1);
+//            }
+//        }
     }
 
-    private boolean isOutOfBounds(int rowIndex, int colIndex) {
-        try {
-            char c = boggleBoard[rowIndex][colIndex];
-        } catch (IndexOutOfBoundsException e) {
-            return true;
+    private boolean isInBoard(final String searchWord) {
+        // the 8 directions from a character we have to check
+        int[] moveX = {1, 1, 0, -1, -1, -1, 0, 1};
+        int[] moveY = {0, 1, 1, 1, 0, -1, -1, -1};
+
+        char[] letters = searchWord.toCharArray();
+        boolean[][][] lettersFound = new boolean[letters.length][boardSize][boardSize]; //@TODO: might cause crash (arrSize 50?)
+
+        for (int letterIndex = 0; letterIndex < letters.length; letterIndex++) {
+            // loop through all letters of the searchWord
+            for (int i = 0; i < boardSize; i++) {
+                for (int j = 0; j < boardSize; j++) {
+                    // loop through all tiles of the boggleBoard
+                    if (letterIndex == 0) {
+                        // always set tested == true for letter 0, position: i,j (because we start at the correct letter)
+                        lettersFound[letterIndex][i][j] = true;
+                    } else {
+                        for (int direction = 0; direction < 8; direction++) {
+                            int x = i + moveX[direction];
+                            int y = j + moveY[direction];
+
+                            // positions are in bounds for board && previous letter was found && character is valid
+                            if (isInBounds(x, y)
+                                    && (lettersFound[letterIndex - 1][x][y])
+                                    && (boggleBoard[i][j] == letters[letterIndex])) {
+                                lettersFound[letterIndex][i][j] = true;
+                                if (letterIndex == letters.length - 1) {
+                                    return true; // we finished the word
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
+
         return false;
     }
 
+    private boolean isInBounds(int x, int y) {
+        try {
+            char c = boggleBoard[x][y];
+        } catch (IndexOutOfBoundsException e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Notice: Only works for boardSize == 4!
+     */
     private void fillStaticBoggleBoard() {
         boggleBoard = new char[][]{
                 {'d', 'g', 'h', 'i'},
@@ -134,8 +182,8 @@ public class Start {
     private void fillRandomBoggleBoard() {
         String alphabet = "abcdefghikjmnlopqrstuvwxyz";
         Random r = new Random();
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < cols; col++) {
+        for (int row = 0; row < boardSize; row++) {
+            for (int col = 0; col < boardSize; col++) {
                 boggleBoard[row][col] = alphabet.charAt(r.nextInt(alphabet.length()));
             }
         }
@@ -148,77 +196,6 @@ public class Start {
                 System.out.print(col + " ");
             }
             System.out.println();
-        }
-    }
-
-    class BoggWord {
-        private ArrayList<BoggLetter> boggLetters;
-
-        public BoggWord() {
-            this.boggLetters = new ArrayList<>();
-        }
-
-        public BoggWord(BoggWord clone) {
-            this.boggLetters = clone.getAll();
-        }
-
-        public void add(BoggLetter boggLetter) {
-            this.boggLetters.add(boggLetter);
-        }
-
-        public int length() {
-            return boggLetters.size();
-        }
-
-        @Override
-        public String toString() {
-            String result = "";
-            for (BoggLetter boggLetter : boggLetters) {
-                result += boggLetter.getChar();
-            }
-            return result;
-        }
-
-        public boolean hasLetter(BoggLetter boggLetter) {
-            return boggLetters.contains(boggLetter);
-        }
-
-        public ArrayList<BoggLetter> getAll() {
-            return boggLetters;
-        }
-    }
-
-    class BoggLetter {
-        private int row, col;
-        private char c;
-
-        public BoggLetter(int row, int col, char c) {
-            this.row = row;
-            this.col = col;
-            this.c = c;
-        }
-
-        @Override
-        public String toString() {
-            return "row: " + row + ", col: " + col + ", char: " + c;
-        }
-
-        public char getChar() {
-            return this.c;
-        }
-
-        @Override
-        public int hashCode() {
-            return row + col + c;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return hashCode() == o.hashCode() ||
-                    o instanceof BoggLetter &&
-                            ((BoggLetter) o).row == row &&
-                            ((BoggLetter) o).col == col &&
-                            ((BoggLetter) o).c == c;
         }
     }
 }
