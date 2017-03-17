@@ -1,6 +1,4 @@
-package Model;
-
-import javafx.scene.control.Cell;
+package BoggleSolver.Model;
 
 import java.util.Random;
 

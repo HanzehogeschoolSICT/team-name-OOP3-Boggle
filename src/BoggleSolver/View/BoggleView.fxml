@@ -32,12 +32,12 @@
                         <Insets left="20.0" right="20.0" />
                      </HBox.margin>
                   </Label>
-                  <Button mnemonicParsing="false" text="Button">
+                  <Button mnemonicParsing="false" text="Start" fx:id="btnStart" onAction="#startBoggleSolver">
                      <HBox.margin>
                         <Insets left="20.0" right="20.0" />
                      </HBox.margin>
                   </Button>
-                  <Button mnemonicParsing="false" text="Button">
+                  <Button mnemonicParsing="false" text="Reset" fx:id="btnReset" onAction="#resetBoard">
                      <HBox.margin>
                         <Insets left="20.0" right="20.0" />
                      </HBox.margin>
