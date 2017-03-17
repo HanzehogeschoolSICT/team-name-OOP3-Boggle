@@ -71,7 +71,7 @@ public class Start {
     public static void readDict(String dictFile) throws IOException, URISyntaxException {
         File fin = new File(Start.class.getClassLoader().getResource(dictFile).toURI());
         //System.out.println(fin.toPath());
-        List<String> words = Files.readAllLines(fin.toPath(), StandardCharsets.ISO_8859);
+        List<String> words = Files.readAllLines(fin.toPath(), StandardCharsets.ISO_8859_1);
 
         dictRoot = new DictNode('\0'); // set the rootNode by default to a 0 char
         for (String word : words) {
