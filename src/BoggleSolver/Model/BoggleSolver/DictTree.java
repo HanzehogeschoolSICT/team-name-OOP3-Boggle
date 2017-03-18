@@ -9,15 +9,23 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 
 /**
- * Created by peterzen on 2017-03-17.
+ * Created by peterzen on 2017-03-18.
  * Part of the team-name-OOP3-Boggle project.
+ * With the help of https://www.youtube.com/watch?v=1dyaASFf-Uc
+ * With the help of https://github.com/bilash/boggle-solver
+ * With the help of http://exceptional-code.blogspot.nl/2012/02/solving-boggle-game-recursion-prefix.html
  */
 public class DictTree {
     private InputStream dictFile;
     private final DictNode rootNode = new DictNode('\0'); // set the rootNode by default to a 0 character
+    private int maxWordSize = 0;
 
     public DictTree(String dictFilePath) throws URISyntaxException {
         dictFile = Start.class.getResourceAsStream(dictFilePath);
+    }
+
+    public DictNode getRootNode() {
+        return rootNode;
     }
 
     public void readFileIntoTree() throws IOException {
@@ -26,6 +34,7 @@ public class DictTree {
         String word;
         while ((word = br.readLine()) != null) {
             if (word.length() < 3) continue;
+            if (word.length() > maxWordSize) maxWordSize = word.length();
 
             try {
                 rootNode.insertLetters(word, 0, rootNode);
@@ -34,44 +43,8 @@ public class DictTree {
         }
     }
 
-    public boolean contains(final String word) {
-        DictNode node = rootNode; // start at the rootNode
-        char[] letters = word.toCharArray();
-
-        int i = 0;
-        while (i < letters.length && node.nextNodes[letters[i] - 'a'] != null) {
-            node = node.nextNodes[letters[i] - 'a']; // traverse a node deeper, for each character found
-            i++;
-        }
-
-        return (i == letters.length) && node.wordEnd;
-    }
-
-    private class DictNode {
-        public final char letter;
-        public DictNode[] nextNodes = new DictNode[26]; // for the characters of the alphabet (a-z only!)
-        public boolean wordEnd;
-
-        private DictNode(char c) {
-            this.letter = c;
-        }
-
-        private void insertLetters(final String word, int index, DictNode currentNode) throws ArrayIndexOutOfBoundsException {
-            if (currentNode.nextNodes[word.charAt(index) - 'a'] == null) {
-                currentNode.nextNodes[word.charAt(index) - 'a'] = new DictNode(word.charAt(index));
-
-                if (index == word.length() - 1)    // set the wordEnd flag when at the last of the letters
-                    currentNode.nextNodes[word.charAt(index) - 'a'].wordEnd = true;
-            }
-
-            // recursively go a node deeper and increment the index, for the next letter
-            if (index != word.length() - 1) {
-                DictNode nextNode = currentNode.nextNodes[word.charAt(index) - 'a'];
-                index++;
-                insertLetters(word, index, nextNode);
-            }
-        }
-
+    public int getMaxWordSize() {
+        return maxWordSize;
     }
 
 }
