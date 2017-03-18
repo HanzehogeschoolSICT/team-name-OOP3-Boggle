@@ -1,5 +1,9 @@
 package BoggleSolver.Model.BoggleSolver;
 
+import BoggleSolver.Model.BoggleBoard.BoggleBoard;
+import BoggleSolver.Model.BoggleDict.DictNode;
+import BoggleSolver.Model.BoggleDict.DictTree;
+
 import java.util.LinkedList;
 import java.util.List;
 

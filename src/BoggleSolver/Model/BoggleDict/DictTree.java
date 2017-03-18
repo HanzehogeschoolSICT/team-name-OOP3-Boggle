@@ -1,4 +1,4 @@
-package BoggleSolver.Model.BoggleSolver;
+package BoggleSolver.Model.BoggleDict;
 
 import BoggleSolver.Start;
 

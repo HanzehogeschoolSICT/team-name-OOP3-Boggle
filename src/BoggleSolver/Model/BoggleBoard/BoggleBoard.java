@@ -1,4 +1,4 @@
-package BoggleSolver.Model.BoggleSolver;
+package BoggleSolver.Model.BoggleBoard;
 
 import java.util.Random;
 

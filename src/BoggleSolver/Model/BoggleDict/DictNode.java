@@ -1,4 +1,4 @@
-package BoggleSolver.Model.BoggleSolver;
+package BoggleSolver.Model.BoggleDict;
 
 /**
  * Created by peterzen on 2017-03-18.

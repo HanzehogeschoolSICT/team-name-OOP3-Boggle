@@ -1,7 +1,7 @@
 package BoggleSolver;
 
-import BoggleSolver.Model.BoggleSolver.BoggleBoard;
-import BoggleSolver.Model.BoggleSolver.DictTree;
+import BoggleSolver.Model.BoggleBoard.BoggleBoard;
+import BoggleSolver.Model.BoggleDict.DictTree;
 import BoggleSolver.Model.BoggleSolver.Solver;
 
 import java.io.IOException;
