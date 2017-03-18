@@ -144,9 +144,11 @@ public class Start {
 
     public Start() throws IOException, URISyntaxException {
         long start = System.currentTimeMillis();
-
-        DictTree dictTree = new DictTree("/dict.txt");
+        DictTree dictTree = new DictTree("/eng-dict.txt");
         dictTree.readFileIntoTree();
+        long end = System.currentTimeMillis();
+        System.out.println("Reading dict in: " + (end - start) + "ms.");
+
 //        HashSet<String> dictSet = new HashSet<>();
 //        File dictFile = new File(Start.class.getClassLoader().getResource("dict.txt").toURI());
 //        List<String> words = Files.readAllLines(dictFile.toPath(), StandardCharsets.ISO_8859_1);
@@ -157,9 +159,7 @@ public class Start {
 
 //        findBoggleWords(dictRoot, new char[50], 0);
 //
-        long end = System.currentTimeMillis();
 //        foundWords.forEach(System.out::println); // print all found words
-        System.out.println("Total time spent = " + (end - start) + "ms.");
 //
         printBoggleBoard();
 //        System.out.println("Words found: " + foundWords.size());

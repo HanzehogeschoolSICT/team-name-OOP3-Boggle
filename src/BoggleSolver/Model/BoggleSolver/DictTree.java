@@ -2,11 +2,11 @@ package BoggleSolver.Model.BoggleSolver;
 
 import BoggleSolver.Start;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by peterzen on 2017-03-17.
@@ -21,10 +21,17 @@ public class DictTree {
     }
 
     public void readFileIntoTree() throws IOException {
-        // use a scanner to retrieve results from the dictFile (using the word-boundary regex delimiter)
-        java.util.Scanner s = new java.util.Scanner(dictFile).useDelimiter("\\b");
-        while (s.hasNext()) // loops over all the words in the dictFile
-            rootNode.insert(s.next());
+        // With the help of http://stackoverflow.com/questions/28050795/whats-the-fastest-way-to-read-from-inputstream
+        BufferedReader br = new BufferedReader(new InputStreamReader(dictFile));
+        String word;
+        while ((word = br.readLine()) != null) {
+            if (word.length() < 3) continue;
+
+            try {
+                rootNode.insertLetters(word, 0, rootNode);
+            } catch (ArrayIndexOutOfBoundsException ignored) {
+            }
+        }
     }
 
     public boolean contains(final String word) {
@@ -32,8 +39,8 @@ public class DictTree {
         char[] letters = word.toCharArray();
 
         int i = 0;
-        while (i < letters.length && node.nextNodes.get(letters[i]) != null) {
-            node = node.nextNodes.get(letters[i]); // traverse a node deeper, for each character found
+        while (i < letters.length && node.nextNodes[letters[i] - 'a'] != null) {
+            node = node.nextNodes[letters[i] - 'a']; // traverse a node deeper, for each character found
             i++;
         }
 
@@ -42,33 +49,26 @@ public class DictTree {
 
     private class DictNode {
         public final char letter;
-        public Map<Character, DictNode> nextNodes = new HashMap<>(); // for the 26 characters of the alphabet
+        public DictNode[] nextNodes = new DictNode[26]; // for the characters of the alphabet (a-z only!)
         public boolean wordEnd;
 
         private DictNode(char c) {
             this.letter = c;
         }
 
-        public void insert(final String word) {
-            DictNode node = rootNode;
-            char[] letters = word.toCharArray();
+        private void insertLetters(final String word, int index, DictNode currentNode) throws ArrayIndexOutOfBoundsException {
+            if (currentNode.nextNodes[word.charAt(index) - 'a'] == null) {
+                currentNode.nextNodes[word.charAt(index) - 'a'] = new DictNode(word.charAt(index));
 
-            insertLetters(letters, 0, node);
-        }
-
-        private void insertLetters(final char[] letters, int index, DictNode currentNode) {
-            if (currentNode.nextNodes.get(letters[index]) == null) {
-                currentNode.nextNodes.put(letters[index], new DictNode(letters[index]));
-
-                if (index == letters.length - 1)    // set the wordEnd flag when at the last of the letters
-                    currentNode.nextNodes.get(letters[index]).wordEnd = true;
+                if (index == word.length() - 1)    // set the wordEnd flag when at the last of the letters
+                    currentNode.nextNodes[word.charAt(index) - 'a'].wordEnd = true;
             }
 
             // recursively go a node deeper and increment the index, for the next letter
-            if (index != letters.length - 1) {
-                DictNode nextNode = currentNode.nextNodes.get(letters[index]);
+            if (index != word.length() - 1) {
+                DictNode nextNode = currentNode.nextNodes[word.charAt(index) - 'a'];
                 index++;
-                insertLetters(letters, index, nextNode);
+                insertLetters(word, index, nextNode);
             }
         }
 
