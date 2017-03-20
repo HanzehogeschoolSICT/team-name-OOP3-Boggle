@@ -5,12 +5,13 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.HPos;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
@@ -20,8 +21,12 @@ import javafx.stage.Stage;
 public class BoggleController extends Application {
     @FXML private GridPane gridPane;
     @FXML private Pane pane;
+    @FXML private HBox hbox;
+    @FXML private Label lbOutput;
+    @FXML private Button btnStart;
+    @FXML private Button btnReset;
     private static int boardSize = 4;
-    private BoardGenerator boardGen = new BoardGenerator();
+    private BoardGenerator boardGen;
 
     public static void startBoggleController(String[] args) {
         BoggleController.launch(args);
@@ -29,28 +34,35 @@ public class BoggleController extends Application {
 
     @SuppressWarnings("unused")
     public void initialize() {
+        this.drawGrid();
         this.loadGrid();
     }
 
+    private void drawGrid() {
+        int i;
+        for (i = 0; i < boardSize; i++) {
+            ColumnConstraints column = new ColumnConstraints(gridPane.getPrefWidth()/boardSize);
+            RowConstraints row = new RowConstraints(gridPane.getPrefHeight()/boardSize);
+            gridPane.getColumnConstraints().add(column);
+            gridPane.getRowConstraints().add(row);
+        }
+    }
+
     private void loadGrid() {
+        boardGen = new BoardGenerator();
         char[][] board = boardGen.getBoard();
         int i;
         int j;
-        // Waarom zijn die laatste 2 columns zo klein? Ook als ik in de constraints aangeef dat ze
-        // allemaal 50 zijn en in de view over width alles weg heb gehaald
-        for (i = 0; i < boardSize; i++) {
-            ColumnConstraints column = new ColumnConstraints(50);
-            gridPane.getColumnConstraints().add(column);
-        }
         for (i = 0; i < boardSize; i++) {
             for (j = 0; j < boardSize; j++) {
                 Label label = new Label();
                 label.setText(Character.toString(board[i][j]));
                 label.setFont(Font.font("Cambria", 32));
+                gridPane.setHalignment(label, HPos.CENTER);
+                // gridPane.setGridLinesVisible(true);
                 gridPane.add(label, j, i);
             }
         }
-
     }
 
     @Override
@@ -69,6 +81,7 @@ public class BoggleController extends Application {
     }
 
     public void resetBoard(ActionEvent actionEvent) {
-        this.initialize();
+        gridPane.getChildren().clear();
+        this.loadGrid();
     }
 }
