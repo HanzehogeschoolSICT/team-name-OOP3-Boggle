@@ -1,6 +1,9 @@
 package BoggleSolver.Controller;
 
 import BoggleSolver.Model.BoardGenerator;
+import BoggleSolver.Model.BoggleBoard.BoggleBoard;
+import BoggleSolver.Model.BoggleDict.DictTree;
+import BoggleSolver.Model.BoggleSolver.Solver;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -15,21 +18,30 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 /**
  * Created by femkeh on 15/03/17.
  */
 public class BoggleController extends Application {
     @FXML private GridPane gridPane;
-    @FXML private Pane pane;
-    @FXML private HBox hbox;
-    @FXML private Label lbOutput;
-    @FXML private Button btnStart;
-    @FXML private Button btnReset;
     private static int boardSize = 4;
-    private BoardGenerator boardGen;
+    private static boolean isStatic = false;
+    //private static DictTree dictTree;
+    private BoggleBoard boardGen;
+    //private Solver solver = new Solver(boardGen, dictTree);
+
+    public BoggleController() {
+//        this.boardSize = boardSize;
+//        this.isStatic = isStatic;
+    }
 
     public static void startBoggleController(String[] args) {
+        //throws IOException, URISyntaxException
         BoggleController.launch(args);
+       // dictTree = new DictTree("/dict.txt");
+        //dictTree.readFileIntoTree();
     }
 
     @SuppressWarnings("unused")
@@ -49,7 +61,7 @@ public class BoggleController extends Application {
     }
 
     private void loadGrid() {
-        boardGen = new BoardGenerator();
+        boardGen = new BoggleBoard(boardSize, isStatic);
         char[][] board = boardGen.getBoard();
         int i;
         int j;
@@ -68,7 +80,10 @@ public class BoggleController extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         stage.setTitle("Boggle");
-        Parent root = FXMLLoader.load(BoggleSolver.Start.class.getResource("View/BoggleView.fxml"));
+        System.out.println(getClass().getResource("../View/BoggleView.fxml"));
+        System.out.println("FXML loader: " + FXMLLoader.load(getClass().getResource("../View/View.fxml")));
+        Parent root = FXMLLoader.load(getClass().getResource("../View/BoggleView.fxml"));
+                //FXMLLoader.load(BoggleSolver.Start.class.getResource("/View/BoggleView.fxml"));
 
         stage.setScene(new Scene(root));
         stage.show();
@@ -76,8 +91,7 @@ public class BoggleController extends Application {
 
     public void startBoggleSolver(ActionEvent actionEvent) {
         // iets uit start die maakt dat het zoeken op gang komt
-        // waarom worden mijn methode namen niet geel?
-        // this.startBoggleSolver(actionEvent); dat deed et iig niet..
+        //solver.findBoggleWords();
     }
 
     public void resetBoard(ActionEvent actionEvent) {
