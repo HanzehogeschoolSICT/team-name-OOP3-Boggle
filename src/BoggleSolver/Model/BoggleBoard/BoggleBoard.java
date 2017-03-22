@@ -12,7 +12,7 @@ import java.util.Random;
  */
 public class BoggleBoard {
     private int boardSize;
-    private char[][] boggleBoard = new char[boardSize][boardSize];
+    private char[][] boggleBoard;
 
     /**
      * Create a new BoggleBoard.
@@ -25,6 +25,7 @@ public class BoggleBoard {
      */
     public BoggleBoard(int boardSize, boolean isStatic) {
         this.boardSize = boardSize;
+        this.boggleBoard = new char[boardSize][boardSize];
 
         if (isStatic && boardSize == 4) {
             setupStaticBoard();
@@ -36,6 +37,7 @@ public class BoggleBoard {
     private void setupRandomBoard() {
         String alphabet = "abcdefghikjmnlopqrstuvwxyz";
         Random r = new Random();
+        System.out.println("index 0 test: " + boggleBoard[0][0]);
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
                 boggleBoard[row][col] = alphabet.charAt(r.nextInt(alphabet.length()));

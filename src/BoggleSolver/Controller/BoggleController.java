@@ -80,9 +80,8 @@ public class BoggleController extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         stage.setTitle("Boggle");
-        System.out.println(getClass().getResource("../View/BoggleView.fxml"));
-        System.out.println("FXML loader: " + FXMLLoader.load(getClass().getResource("../View/View.fxml")));
-        Parent root = FXMLLoader.load(getClass().getResource("../View/BoggleView.fxml"));
+        System.out.println(getClass().getResource("../View/BoggleView.fxml").toURI().toURL());
+        Parent root = FXMLLoader.load(getClass().getResource("../View/BoggleView.fxml").toURI().toURL());
                 //FXMLLoader.load(BoggleSolver.Start.class.getResource("/View/BoggleView.fxml"));
 
         stage.setScene(new Scene(root));
