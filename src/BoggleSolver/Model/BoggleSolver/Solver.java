@@ -126,4 +126,12 @@ public class Solver {
         }
         return letters.size() > 0 ? letters : null;
     }
+
+    public void setBoggleBoard(BoggleBoard board) {
+        this.board = board;
+    }
+
+    public void resetFoundWords() {
+        foundWords.clear();
+    }
 }

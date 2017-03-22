@@ -10,6 +10,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -26,11 +27,13 @@ import java.net.URISyntaxException;
 public class BoggleController extends Application {
     @FXML private GridPane gridPane;
     @FXML private Label lbOutput;
+    @FXML private Button btnStart;
     private static int boardSize = 4;
     private static boolean isStatic = false;
     private static DictTree dictTree;
     private BoggleBoard boardGen;
     private Solver solver;
+    private char[][] board;
 
     public BoggleController() {
     }
@@ -63,7 +66,7 @@ public class BoggleController extends Application {
 
     private void loadGrid() {
         boardGen = new BoggleBoard(boardSize, isStatic);
-        char[][] board = boardGen.getBoard();
+        board = boardGen.getBoard();
         int i;
         int j;
         for (i = 0; i < boardSize; i++) {
@@ -87,7 +90,7 @@ public class BoggleController extends Application {
     }
 
     public void startBoggleSolver(ActionEvent actionEvent) {
-        // iets uit start die maakt dat het zoeken op gang komt
+        btnStart.setDisable(true);
         long searchStart = System.currentTimeMillis();
         solver.findBoggleWords();
         lbOutput.setText("There are " + solver.foundWords.size() + " words found.");
@@ -101,6 +104,11 @@ public class BoggleController extends Application {
 
     public void resetBoard(ActionEvent actionEvent) {
         gridPane.getChildren().clear();
+        lbOutput.setText("There are no words found.");
         this.loadGrid();
+        boardGen.setBoard(board);
+        solver.setBoggleBoard(boardGen);
+        solver.resetFoundWords();
+        btnStart.setDisable(false);
     }
 }

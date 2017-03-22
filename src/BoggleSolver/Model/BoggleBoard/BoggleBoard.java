@@ -83,6 +83,10 @@ public class BoggleBoard {
         return boggleBoard;
     }
 
+    public void setBoard(char[][] boggleBoard) {
+        this.boggleBoard = boggleBoard;
+    }
+
     public char getCharAt(int row, int col) {
         return boggleBoard[row][col];
     }
