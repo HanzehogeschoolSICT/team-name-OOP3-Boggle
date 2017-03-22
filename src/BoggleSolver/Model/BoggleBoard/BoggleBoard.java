@@ -35,9 +35,8 @@ public class BoggleBoard {
     }
 
     private void setupRandomBoard() {
-        String alphabet = "abcdefghikjmnlopqrstuvwxyz";
+        String alphabet = "aaabcdeeefghiiikjmnlooopqrstuuuvwxyz";
         Random r = new Random();
-        System.out.println("index 0 test: " + boggleBoard[0][0]);
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
                 boggleBoard[row][col] = alphabet.charAt(r.nextInt(alphabet.length()));

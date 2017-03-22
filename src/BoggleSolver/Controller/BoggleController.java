@@ -1,6 +1,5 @@
 package BoggleSolver.Controller;
 
-import BoggleSolver.Model.BoardGenerator;
 import BoggleSolver.Model.BoggleBoard.BoggleBoard;
 import BoggleSolver.Model.BoggleDict.DictTree;
 import BoggleSolver.Model.BoggleSolver.Solver;
@@ -9,12 +8,12 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.*;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
@@ -26,15 +25,14 @@ import java.net.URISyntaxException;
  */
 public class BoggleController extends Application {
     @FXML private GridPane gridPane;
+    @FXML private Label lbOutput;
     private static int boardSize = 4;
     private static boolean isStatic = false;
-    //private static DictTree dictTree;
+    private static DictTree dictTree;
     private BoggleBoard boardGen;
-    //private Solver solver = new Solver(boardGen, dictTree);
+    private Solver solver;
 
     public BoggleController() {
-//        this.boardSize = boardSize;
-//        this.isStatic = isStatic;
     }
 
     public static void startBoggleController(String[] args) {
@@ -45,9 +43,12 @@ public class BoggleController extends Application {
     }
 
     @SuppressWarnings("unused")
-    public void initialize() {
+    public void initialize() throws IOException, URISyntaxException {
         this.drawGrid();
         this.loadGrid();
+        dictTree = new DictTree("/dict.txt");
+        dictTree.readFileIntoTree();
+        solver = new Solver(boardGen, dictTree);
     }
 
     private void drawGrid() {
@@ -80,17 +81,22 @@ public class BoggleController extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         stage.setTitle("Boggle");
-        System.out.println(getClass().getResource("../View/BoggleView.fxml").toURI().toURL());
         Parent root = FXMLLoader.load(getClass().getResource("../View/BoggleView.fxml").toURI().toURL());
-                //FXMLLoader.load(BoggleSolver.Start.class.getResource("/View/BoggleView.fxml"));
-
         stage.setScene(new Scene(root));
         stage.show();
     }
 
     public void startBoggleSolver(ActionEvent actionEvent) {
         // iets uit start die maakt dat het zoeken op gang komt
-        //solver.findBoggleWords();
+        long searchStart = System.currentTimeMillis();
+        solver.findBoggleWords();
+        lbOutput.setText("There are " + solver.foundWords.size() + " words found.");
+        long searchEnd = System.currentTimeMillis();
+
+        solver.foundWords.forEach(System.out::println);
+        System.out.println(boardGen);
+        System.out.println("Words found: " + solver.foundWords.size());
+        System.out.println("Found boggle words in: " + (searchEnd - searchStart) + "ms.");
     }
 
     public void resetBoard(ActionEvent actionEvent) {
