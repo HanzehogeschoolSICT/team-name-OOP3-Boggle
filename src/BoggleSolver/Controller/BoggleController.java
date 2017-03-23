@@ -39,10 +39,7 @@ public class BoggleController extends Application {
     }
 
     public static void startBoggleController(String[] args) {
-        //throws IOException, URISyntaxException
         BoggleController.launch(args);
-       // dictTree = new DictTree("/dict.txt");
-        //dictTree.readFileIntoTree();
     }
 
     @SuppressWarnings("unused")

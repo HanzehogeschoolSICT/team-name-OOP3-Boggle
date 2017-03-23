@@ -19,29 +19,6 @@ import java.net.URISyntaxException;
 public class Start {
 
     public static void main(String[] args) throws IOException, URISyntaxException {
-//        new Start();
         BoggleController.startBoggleController(args);
     }
-
-
-    public Start() throws IOException, URISyntaxException {
-        DictTree dictTree = new DictTree("/dict.txt");
-        dictTree.readFileIntoTree();
-        System.out.println("DictTree is ingeladen");
-        //BoggleController boggleController = new BoggleController( args, 4, false, dictTree);
-        //long dictStart = System.currentTimeMillis();
-        //System.out.println("Reading dict in: " + (System.currentTimeMillis() - dictStart) + "ms.");
-
-//        BoggleBoard board = new BoggleBoard(4, true);
-//        Solver solver = new Solver(board, dictTree);
-//
-//        long searchStart = System.currentTimeMillis();
-//        solver.findBoggleWords();
-//        long searchEnd = System.currentTimeMillis();
-//
-//        solver.foundWords.forEach(System.out::println);
-//        System.out.println(board);
-//        System.out.println("Words found: " + solver.foundWords.size());
-//        System.out.println("Found boggle words in: " + (searchEnd - searchStart) + "ms.");
-    }
-}
+};
